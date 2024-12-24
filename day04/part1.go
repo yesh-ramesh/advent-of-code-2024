@@ -15,18 +15,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Build grid
 	gridSize := 140
 	grid := make([][]rune, gridSize)
 	for i := range grid {
 		grid[i] = make([]rune, gridSize)
 	}
 
-	visited := make([][]bool, gridSize)
-	for i := range grid {
-		visited[i] = make([]bool, gridSize)
-	}
-
-	// Build grid
 	index := 0
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -36,7 +31,7 @@ func main() {
 		index++
 	}
 
-	// Search every cell and every direction
+	// Search every cell and every direction using a DFS word-search algo
 	word := []rune("XMAS")
 	for i := 0; i < gridSize; i++ {
 		for j := 0; j < gridSize; j++ {
@@ -55,19 +50,23 @@ func main() {
 }
 
 func wordSearch(row int, col int, grid [][]rune, word []rune, index int, dirX int, dirY int) bool {
+	// Ignore out of bounds
 	if row < 0 || row >= len(grid) || col < 0 || col >= len(grid) {
 		return false
 	}
 
+	// We've found the target word
 	if index == len(word)-1 && grid[row][col] == word[index] {
 		totalCount++
 		return true
 	}
 
+	// Cell doesn't match target word
 	if grid[row][col] != word[index] {
 		return false
 	}
 
+	// Check adjacent cells
 	newRow := row + dirX
 	newCol := col + dirY
 
