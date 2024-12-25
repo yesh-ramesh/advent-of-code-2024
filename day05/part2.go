@@ -16,11 +16,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	isAfter := make(map[int][]int)
 	scanner := bufio.NewScanner(file)
-
-	// Read the first chunk of input and create a map to keep track of what comes after what
-	// after is a key-value map that gives me a slice of all numbers that come after a key
-	after := make(map[int][]int)
 	for scanner.Scan() {
 		line := scanner.Text()
 
@@ -33,14 +30,13 @@ func main() {
 		first, _ := strconv.Atoi(split[0])
 		second, _ := strconv.Atoi(split[1])
 
-		if _, ok := after[second]; !ok {
-			after[second] = make([]int, 0)
+		if _, ok := isAfter[second]; !ok {
+			isAfter[second] = make([]int, 0)
 		}
 
-		after[second] = append(after[second], first)
+		isAfter[second] = append(isAfter[second], first)
 	}
 
-	// Read the second chunk of input to get our list of numbers
 	var listOfLists [][]int
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -54,21 +50,19 @@ func main() {
 		listOfLists = append(listOfLists, list)
 	}
 
-	// Use the map of ordering to determine valid, ordered lists
-	var validLists [][]int
+	var invalidLists [][]int
 	for _, list := range listOfLists {
-		if isValid(list, after) {
-			validLists = append(validLists, list)
+		if isValid(list, isAfter) {
+			invalidLists = append(invalidLists, list)
 		}
 	}
 
-	// Sum up the middle value of the valid, ordered lists
 	middleTotal := 0
-	for _, list := range validLists {
-		middle := len(list) / 2
-		middleTotal += list[middle]
+	for _, list := range invalidLists {
+		ordered := order(list, isAfter)
+		middle := len(ordered) / 2
+		middleTotal += ordered[middle]
 	}
-
 	fmt.Println(middleTotal)
 }
 
@@ -76,10 +70,24 @@ func isValid(list []int, after map[int][]int) bool {
 	for i := 0; i < len(list); i++ {
 		for j := i + 1; j < len(list); j++ {
 			if !slices.Contains(after[list[j]], list[i]) {
-				return false
+				return true
 			}
 		}
 	}
 
-	return true
+	return false
+}
+
+func order(unordered []int, after map[int][]int) []int {
+	for i := 0; i < len(unordered); i++ {
+		for j := i + 1; j < len(unordered); j++ {
+			if !slices.Contains(after[unordered[j]], unordered[i]) {
+				temp := unordered[i]
+				unordered[i] = unordered[j]
+				unordered[j] = temp
+			}
+		}
+	}
+
+	return unordered
 }
