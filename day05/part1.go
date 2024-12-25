@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -20,6 +19,7 @@ func main() {
 
 	// Read the first chunk of input and create a map to keep track of what comes after what
 	// after is a key-value map that gives me a slice of all numbers that come after a key
+	// For example, after[1] = { 2, 4, 5 } means 1 must come after 2, 4, and 5
 	after := make(map[int][]int)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -40,7 +40,7 @@ func main() {
 		after[second] = append(after[second], first)
 	}
 
-	// Read the second chunk of input to get our list of numbers
+	// Read the second chunk of input to get our lists of numbers
 	var listOfLists [][]int
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -54,7 +54,7 @@ func main() {
 		listOfLists = append(listOfLists, list)
 	}
 
-	// Use the map of ordering to determine valid, ordered lists
+	// Use the after map to determine valid, ordered lists
 	var validLists [][]int
 	for _, list := range listOfLists {
 		if isValid(list, after) {
@@ -70,16 +70,4 @@ func main() {
 	}
 
 	fmt.Println(middleTotal)
-}
-
-func isValid(list []int, after map[int][]int) bool {
-	for i := 0; i < len(list); i++ {
-		for j := i + 1; j < len(list); j++ {
-			if !slices.Contains(after[list[j]], list[i]) {
-				return false
-			}
-		}
-	}
-
-	return true
 }

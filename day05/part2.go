@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -16,8 +15,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	isAfter := make(map[int][]int)
 	scanner := bufio.NewScanner(file)
+
+	// Read the first chunk of input and create a map to keep track of what comes after what
+	// after is a key-value map that gives me a slice of all numbers that come after a key
+	// For example, after[1] = { 2, 4, 5 } means 1 must come after 2, 4, and 5
+	isAfter := make(map[int][]int)
 	for scanner.Scan() {
 		line := scanner.Text()
 
@@ -37,6 +40,7 @@ func main() {
 		isAfter[second] = append(isAfter[second], first)
 	}
 
+	// Read the second chunk of input to get our lists of numbers
 	var listOfLists [][]int
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -50,6 +54,7 @@ func main() {
 		listOfLists = append(listOfLists, list)
 	}
 
+	// Use the after map to determine invalid, unordered lists
 	var invalidLists [][]int
 	for _, list := range listOfLists {
 		if isValid(list, isAfter) {
@@ -57,6 +62,7 @@ func main() {
 		}
 	}
 
+	// Put the invalid lists in the correct order and sum their middle values
 	middleTotal := 0
 	for _, list := range invalidLists {
 		ordered := order(list, isAfter)
@@ -64,30 +70,4 @@ func main() {
 		middleTotal += ordered[middle]
 	}
 	fmt.Println(middleTotal)
-}
-
-func isValid(list []int, after map[int][]int) bool {
-	for i := 0; i < len(list); i++ {
-		for j := i + 1; j < len(list); j++ {
-			if !slices.Contains(after[list[j]], list[i]) {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-func order(unordered []int, after map[int][]int) []int {
-	for i := 0; i < len(unordered); i++ {
-		for j := i + 1; j < len(unordered); j++ {
-			if !slices.Contains(after[unordered[j]], unordered[i]) {
-				temp := unordered[i]
-				unordered[i] = unordered[j]
-				unordered[j] = temp
-			}
-		}
-	}
-
-	return unordered
 }
